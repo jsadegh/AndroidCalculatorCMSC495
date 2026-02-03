@@ -23,16 +23,43 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-                    CalculatorScreen()
+            CalculatorScreen()
         }
     }
 }
 
 class CalcHistory(
-
     val expression: String,
     val result: String
 )
+
+// --- LG EARTHY COLOR PALETTE ---
+// Centralized palette so the whole UI can be rethemed by editing only this object.
+private object CalcColors {
+    // App surfaces
+    val Frame = Color(0xFF1A1A14)          // deep forest-ink (background)
+    val Display = Color(0xFFE7DDC8)        // parchment (main display)
+    val DisplayText = Color(0xFF1B1A16)    // near-black ink
+
+    // History surfaces
+    val HistoryPanel = Color(0xFF232118)   // dark moss/charred olive
+    val HistoryCard = Color(0xFF2E2B1F)    // warm shadow bark
+    val HistoryTitleText = Color(0xFFEFE6D6)
+    val HistoryItemText = Color(0xFFE7DDC8)
+
+    // Buttons
+    val NumberBtn = Color(0xFF2B2A20)      // bark/espresso
+    val OperatorBtn = Color(0xFF6B7A3A)    // moss green
+    val EqualsBtn = Color(0xFF8B6A2B)      // antique gold/bronze
+
+    val ClearBtn = Color(0xFF7A2E2E)       // dried berry / oxblood
+    val BackspaceBtn = Color(0xFFB07A2A)   // amber
+    val HistoryBtn = Color(0xFF4F3B5F)     // muted amethyst (witchy accent)
+
+    // Text on buttons
+    val BtnText = Color(0xFFEFE6D6)        // warm parchment-white
+}
+
 @Composable
 fun CalculatorScreen() {
 
@@ -50,7 +77,7 @@ fun CalculatorScreen() {
             if (num == ".") {
                 displayText = "0."
             } else
-               displayText = num
+                displayText = num
 
             isNewNumber = false
 
@@ -140,7 +167,7 @@ fun CalculatorScreen() {
     //frame
     Column(
         modifier = Modifier.fillMaxSize()
-            .background(Color(0xFF424242)) //frame color
+            .background(CalcColors.Frame)
             .padding(16.dp)
     ) {
 
@@ -148,7 +175,7 @@ fun CalculatorScreen() {
         if (showHistory) {
             Card(
                 modifier = Modifier.fillMaxWidth().weight(0.6f).padding(bottom = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
+                colors = CardDefaults.cardColors(containerColor = CalcColors.HistoryPanel)
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize().padding(8.dp)
@@ -159,9 +186,10 @@ fun CalculatorScreen() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "History", color = Color.White, fontSize = 20.sp
+                            text = "History",
+                            color = CalcColors.HistoryTitleText,
+                            fontSize = 20.sp
                         )
-
                     }
 
                     LazyColumn(
@@ -170,8 +198,7 @@ fun CalculatorScreen() {
                         items(history) { item ->
                             Card(
                                 modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFF2C2C2C)
-                                )
+                                colors = CardDefaults.cardColors(containerColor = CalcColors.HistoryCard)
                             ) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth().padding(10.dp),
@@ -180,7 +207,7 @@ fun CalculatorScreen() {
                                 ) {
                                     Text(
                                         text = "${item.expression} = ${item.result}",
-                                        color = Color.White,
+                                        color = CalcColors.HistoryItemText,
                                         fontSize = 16.sp,
                                     )
                                 }
@@ -190,11 +217,12 @@ fun CalculatorScreen() {
                 }
             }
         }
+
         //display
         Card(
             //can adjust size of the history panel by adjusting weight
             modifier = Modifier.fillMaxWidth().weight(if (showHistory) 0.3f else 1f),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5DC)) //display color
+            colors = CardDefaults.cardColors(containerColor = CalcColors.Display)
         ) {
             Column(
                 //display text alignment
@@ -204,7 +232,9 @@ fun CalculatorScreen() {
             ) {
                 Text(
                     //display text properties
-                    text = displayText, color = Color.Black, fontSize = 54.sp,
+                    text = displayText,
+                    color = CalcColors.DisplayText,
+                    fontSize = 54.sp,
                     textAlign = TextAlign.End,
                     maxLines = 2
                 )
@@ -213,49 +243,44 @@ fun CalculatorScreen() {
 
         //buttons
         Column(modifier = Modifier.fillMaxWidth()) {
+
             //Row 1
             Row(modifier = Modifier.fillMaxWidth()) {
-
-                CalcButton("AC", Modifier.weight(1f), Color(0xFFFF5252)) { clear() }
-                CalcButton("⌫", Modifier.weight(1f), Color(0xFFFF9800)) { backspace() }
-                //using stopwatch unicode emote. Can switch out for a better history icon
-                CalcButton("⏱", Modifier.weight(1f), Color(0xFF0000FF)) { showHistory = !showHistory }
-                CalcButton("÷", Modifier.weight(1f), Color(0xFF0000FF)) { executeOperation("÷") }
+                CalcButton("AC", Modifier.weight(1f), CalcColors.ClearBtn) { clear() }
+                CalcButton("⌫", Modifier.weight(1f), CalcColors.BackspaceBtn) { backspace() }
+                CalcButton("⏱", Modifier.weight(1f), CalcColors.HistoryBtn) { showHistory = !showHistory }
+                CalcButton("÷", Modifier.weight(1f), CalcColors.OperatorBtn) { executeOperation("÷") }
             }
 
             //Row 2
             Row(modifier = Modifier.fillMaxWidth()) {
-
-                CalcButton("7", Modifier.weight(1f), Color(0xFF2C2C2C)) { appendNumber("7") }
-                CalcButton("8", Modifier.weight(1f), Color(0xFF2C2C2C)) { appendNumber("8") }
-                CalcButton("9", Modifier.weight(1f), Color(0xFF2C2C2C)) { appendNumber("9") }
-                CalcButton("×", Modifier.weight(1f), Color(0xFF0000FF)) { executeOperation("×") }
+                CalcButton("7", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("7") }
+                CalcButton("8", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("8") }
+                CalcButton("9", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("9") }
+                CalcButton("×", Modifier.weight(1f), CalcColors.OperatorBtn) { executeOperation("×") }
             }
 
             //Row 3
             Row(modifier = Modifier.fillMaxWidth()) {
-
-                CalcButton("4", Modifier.weight(1f), Color(0xFF2C2C2C)) { appendNumber("4") }
-                CalcButton("5", Modifier.weight(1f), Color(0xFF2C2C2C)) { appendNumber("5") }
-                CalcButton("6", Modifier.weight(1f), Color(0xFF2C2C2C)) { appendNumber("6") }
-                CalcButton("-", Modifier.weight(1f), Color(0xFF0000FF)) { executeOperation("-") }
+                CalcButton("4", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("4") }
+                CalcButton("5", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("5") }
+                CalcButton("6", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("6") }
+                CalcButton("-", Modifier.weight(1f), CalcColors.OperatorBtn) { executeOperation("-") }
             }
 
             //Row 4
             Row(modifier = Modifier.fillMaxWidth()) {
-
-                CalcButton("1", Modifier.weight(1f), Color(0xFF2C2C2C)) { appendNumber("1") }
-                CalcButton("2", Modifier.weight(1f), Color(0xFF2C2C2C)) { appendNumber("2") }
-                CalcButton("3", Modifier.weight(1f), Color(0xFF2C2C2C)) { appendNumber("3") }
-                CalcButton("+", Modifier.weight(1f), Color(0xFF0000FF)) { executeOperation("+") }
+                CalcButton("1", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("1") }
+                CalcButton("2", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("2") }
+                CalcButton("3", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("3") }
+                CalcButton("+", Modifier.weight(1f), CalcColors.OperatorBtn) { executeOperation("+") }
             }
 
             //Row 5
             Row(modifier = Modifier.fillMaxWidth()) {
-
-                CalcButton("0", Modifier.weight(2f), Color(0xFF2C2C2C)) { appendNumber("0") }
-                CalcButton(".", Modifier.weight(1f), Color(0xFF2C2C2C)) { appendNumber(".") }
-                CalcButton("=", Modifier.weight(1f), Color(0xFF006400)) { calculate() }
+                CalcButton("0", Modifier.weight(2f), CalcColors.NumberBtn) { appendNumber("0") }
+                CalcButton(".", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber(".") }
+                CalcButton("=", Modifier.weight(1f), CalcColors.EqualsBtn) { calculate() }
             }
         }
     }
@@ -265,22 +290,19 @@ fun CalculatorScreen() {
 fun CalcButton(
     text: String,
     modifier: Modifier = Modifier,
-    //colors are defined for each individual button. We can "group" based on button type later maybe
     backgroundColor: Color,
     onClick: () -> Unit
 ) {
-    //button spacing, size, and shape
     Button(
         onClick = onClick,
         modifier = modifier.height(80.dp).padding(5.dp),
         shape = RoundedCornerShape(50.dp),
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
     ) {
-        //button text properties
         Text(
             text = text,
             fontSize = 24.sp,
-            color = Color.LightGray,
+            color = CalcColors.BtnText
         )
     }
 }
