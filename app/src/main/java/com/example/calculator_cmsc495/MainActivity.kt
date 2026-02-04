@@ -33,31 +33,32 @@ class CalcHistory(
     val result: String
 )
 
-// Goth-gold / earthy-witch palette.
-// Edit colors here to reskin the whole app without hunting hex codes.
+// Glitter-gold + plum + ink palette.
+// Only tweak these values to re-skin everything.
 private object CalcColors {
+
     // App surfaces
-    val Frame = Color(0xFF14110F)         // near-black espresso
-    val Display = Color(0xFFE7DDC8)       // parchment
-    val DisplayText = Color(0xFF1B1A16)   // ink
+    val Frame = Color(0xFF0B0B0E)          // ink black (background)
+    val Display = Color(0xFFF2E7D6)        // warm parchment
+    val DisplayText = Color(0xFF0B0B0E)    // ink text
 
     // History surfaces
-    val HistoryPanel = Color(0xFF1C1713)  // darker than frame for separation
-    val HistoryCard = Color(0xFF2A221B)   // warm charcoal/bark
-    val HistoryTitleText = Color(0xFFF2E9D8)
-    val HistoryItemText = Color(0xFFE7DDC8)
+    val HistoryPanel = Color(0xFF141019)   // deep plum-ink
+    val HistoryCard  = Color(0xFF1B1422)   // slightly lighter plum
+    val HistoryTitleText = Color(0xFFF7EEDC)
+    val HistoryItemText  = Color(0xFFEFE3CF)
 
     // Buttons
-    val NumberBtn = Color(0xFF2B241D)     // espresso bark
-    val OperatorBtn = Color(0xFFB08A2E)   // antique gold
-    val EqualsBtn = Color(0xFF7B5A16)     // deeper bronze (stands out)
+    val NumberBtn   = Color(0xFF161218)    // ink charcoal (numbers)
+    val OperatorBtn = Color(0xFFD4AF37)    // classic gold (ops)
+    val EqualsBtn   = Color(0xFFFFD66B)    // bright "glitter" gold pop (equals)
 
-    val ClearBtn = Color(0xFF6E2323)      // oxblood
-    val BackspaceBtn = Color(0xFF9B6A1E)  // amber-gold
-    val HistoryBtn = Color(0xFF3D2B4A)    // muted amethyst (witchy accent)
+    val ClearBtn    = Color(0xFF5B0F1A)    // deep wine (AC)
+    val BackspaceBtn= Color(0xFFB8872B)    // warm gold-brown (⌫)
+    val HistoryBtn  = Color(0xFF4B1F6F)    // plum purple (⏱)
 
     // Text
-    val BtnText = Color(0xFFF2E9D8)       // warm off-white
+    val BtnText     = Color(0xFFF8F2E6)    // warm off-white
 }
 
 @Composable
