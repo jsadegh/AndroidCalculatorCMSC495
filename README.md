@@ -6,7 +6,7 @@ This project was developed as part of the CMSC 495 Computer Science Capstone and
 Rather than aiming for feature overload, this calculator emphasizes clarity, polish, and a maintainable structure—both in code and in design.
 
 ## Screenshot
-![Calculator Screenshot](calculator_screenshot.png)
+![Calculator Screenshot](screenshot.png)
 
 ## Features
 - Basic arithmetic operations: addition, subtraction, multiplication, and division  
