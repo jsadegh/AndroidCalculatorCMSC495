@@ -1,16 +1,16 @@
 package com.example.calculator_cmsc495
 
-import kotlin.math.*
+import kotlin.math.*                     // Math helpers (some reserved for future)
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyColumn          // Scrollable history list
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.*                            // Compose state
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,83 +18,86 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// App entry point — launches the Compose screen.
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            CalculatorScreen()
-        }
+        setContent { CalculatorScreen() }
     }
 }
 
+// Tiny container for “expression = result” history rows.
 class CalcHistory(
     val expression: String,
     val result: String
 )
 
-// --- LG EARTHY COLOR PALETTE ---
-// Centralized palette so the whole UI can be rethemed by editing only this object.
+// Goth-gold / earthy-witch palette.
+// Edit colors here to reskin the whole app without hunting hex codes.
 private object CalcColors {
     // App surfaces
-    val Frame = Color(0xFF1A1A14)          // deep forest-ink (background)
-    val Display = Color(0xFFE7DDC8)        // parchment (main display)
-    val DisplayText = Color(0xFF1B1A16)    // near-black ink
+    val Frame = Color(0xFF14110F)         // near-black espresso
+    val Display = Color(0xFFE7DDC8)       // parchment
+    val DisplayText = Color(0xFF1B1A16)   // ink
 
     // History surfaces
-    val HistoryPanel = Color(0xFF232118)   // dark moss/charred olive
-    val HistoryCard = Color(0xFF2E2B1F)    // warm shadow bark
-    val HistoryTitleText = Color(0xFFEFE6D6)
+    val HistoryPanel = Color(0xFF1C1713)  // darker than frame for separation
+    val HistoryCard = Color(0xFF2A221B)   // warm charcoal/bark
+    val HistoryTitleText = Color(0xFFF2E9D8)
     val HistoryItemText = Color(0xFFE7DDC8)
 
     // Buttons
-    val NumberBtn = Color(0xFF2B2A20)      // bark/espresso
-    val OperatorBtn = Color(0xFF6B7A3A)    // moss green
-    val EqualsBtn = Color(0xFF8B6A2B)      // antique gold/bronze
+    val NumberBtn = Color(0xFF2B241D)     // espresso bark
+    val OperatorBtn = Color(0xFFB08A2E)   // antique gold
+    val EqualsBtn = Color(0xFF7B5A16)     // deeper bronze (stands out)
 
-    val ClearBtn = Color(0xFF7A2E2E)       // dried berry / oxblood
-    val BackspaceBtn = Color(0xFFB07A2A)   // amber
-    val HistoryBtn = Color(0xFF4F3B5F)     // muted amethyst (witchy accent)
+    val ClearBtn = Color(0xFF6E2323)      // oxblood
+    val BackspaceBtn = Color(0xFF9B6A1E)  // amber-gold
+    val HistoryBtn = Color(0xFF3D2B4A)    // muted amethyst (witchy accent)
 
-    // Text on buttons
-    val BtnText = Color(0xFFEFE6D6)        // warm parchment-white
+    // Text
+    val BtnText = Color(0xFFF2E9D8)       // warm off-white
 }
 
 @Composable
 fun CalculatorScreen() {
 
-    var currentValue by remember { mutableStateOf(0.0) }
-    var previousValue by remember { mutableStateOf(0.0) }
-    var displayText by remember { mutableStateOf("0") }
-    var operation by remember { mutableStateOf("") }
-    var isNewNumber by remember { mutableStateOf(true) }
+    // --- Calculator state ---
+    var currentValue by remember { mutableStateOf(0.0) }     // number being typed/used
+    var previousValue by remember { mutableStateOf(0.0) }    // stored value before operator
+    var displayText by remember { mutableStateOf("0") }      // what user sees
+    var operation by remember { mutableStateOf("") }         // +, -, ×, ÷
+    var isNewNumber by remember { mutableStateOf(true) }     // are we starting fresh input?
     var history by remember { mutableStateOf(listOf<CalcHistory>()) }
     var showHistory by remember { mutableStateOf(false) }
 
+    // Adds digits (or decimal) to the display.
     fun appendNumber(num: String) {
 
         if (isNewNumber) {
-            if (num == ".") {
-                displayText = "0."
-            } else
-                displayText = num
-
+            // Starting a fresh number: "." becomes "0." like a normal calculator.
+            displayText = if (num == ".") "0." else num
             isNewNumber = false
-
         } else {
+            // Don't allow multiple decimals.
             if (num == "." && displayText.contains(".")) return
 
-            if (displayText == "0" && num != ".") {
-                displayText = num
-            } else
+            // Replace leading zero unless we're typing a decimal.
+            displayText = if (displayText == "0" && num != ".") {
+                num
+            } else {
+                // IMPORTANT: must assign back, or multi-digit input “does nothing”.
                 displayText + num
+            }
         }
 
+        // Keep numeric state synced to the display.
         currentValue = displayText.toDoubleOrNull() ?: 0.0
     }
 
+    // Deletes the last character, or resets if we're basically empty.
     fun backspace() {
-
         if (!isNewNumber && displayText.length > 1) {
             displayText = displayText.dropLast(1)
             currentValue = displayText.toDoubleOrNull() ?: 0.0
@@ -105,38 +108,36 @@ fun CalculatorScreen() {
         }
     }
 
+    // Runs the current operation and formats the result nicely.
     fun calculate() {
 
         val result = when (operation) {
-
             "+" -> previousValue + currentValue
             "-" -> previousValue - currentValue
             "×" -> previousValue * currentValue
-            "÷" -> if (currentValue != 0.0) {
-                previousValue / currentValue
-            } else Double.NaN
-
+            "÷" -> if (currentValue != 0.0) previousValue / currentValue else Double.NaN
             else -> currentValue
         }
 
-        val resultText = if (result.isNaN()) {
-            "Error"
-        }
-        else {
-            //keep if the result is a whole number
-            if (result % 1.0 == 0.0) {
+        // "Error" for invalid math, otherwise clean formatting.
+        val resultText =
+            if (result.isNaN()) {
+                "Error"
+            } else if (result % 1.0 == 0.0) {
                 result.toLong().toString()
+            } else {
+                String.format("%.8f", result).trimEnd('0').trimEnd('.')
             }
-            //Shows 8 decimal places if the decimal places are nonzero
-            else String.format("%.8f", result).trimEnd('0').trimEnd('.')
-        }
 
-        //add to history if a calculation happens
+        // Only add history when a real operation happened.
         if (operation.isNotEmpty()) {
-            val expression = "$previousValue $operation $currentValue"
-            history = history + CalcHistory(expression, resultText)
+            history = history + CalcHistory(
+                expression = "$previousValue $operation $currentValue",
+                result = resultText
+            )
         }
 
+        // Reset for next input.
         displayText = resultText
         currentValue = result
         previousValue = 0.0
@@ -144,8 +145,9 @@ fun CalculatorScreen() {
         isNewNumber = true
     }
 
+    // Stores the operator and prepares for the next number.
     fun executeOperation(oper: String) {
-
+        // Allows chaining like 2 + 3 + 4 (auto-calc before switching ops).
         if (operation.isNotEmpty() && !isNewNumber) {
             calculate()
         }
@@ -155,8 +157,8 @@ fun CalculatorScreen() {
         isNewNumber = true
     }
 
+    // Full reset.
     fun clear() {
-
         displayText = "0"
         currentValue = 0.0
         previousValue = 0.0
@@ -164,53 +166,46 @@ fun CalculatorScreen() {
         isNewNumber = true
     }
 
-    //frame
+    // --- UI ---
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(CalcColors.Frame)
             .padding(16.dp)
     ) {
 
-        // History Panel
+        // History panel (toggle with the ⏱ button)
         if (showHistory) {
             Card(
-                modifier = Modifier.fillMaxWidth().weight(0.6f).padding(bottom = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.6f)
+                    .padding(bottom = 8.dp),
                 colors = CardDefaults.cardColors(containerColor = CalcColors.HistoryPanel)
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize().padding(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "History",
-                            color = CalcColors.HistoryTitleText,
-                            fontSize = 20.sp
-                        )
-                    }
+                Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
 
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                    ) {
+                    Text(
+                        text = "History",
+                        color = CalcColors.HistoryTitleText,
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(history) { item ->
                             Card(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 5.dp),
                                 colors = CardDefaults.cardColors(containerColor = CalcColors.HistoryCard)
                             ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(10.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "${item.expression} = ${item.result}",
-                                        color = CalcColors.HistoryItemText,
-                                        fontSize = 16.sp,
-                                    )
-                                }
+                                Text(
+                                    text = "${item.expression} = ${item.result}",
+                                    color = CalcColors.HistoryItemText,
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.padding(10.dp)
+                                )
                             }
                         }
                     }
@@ -218,20 +213,19 @@ fun CalculatorScreen() {
             }
         }
 
-        //display
+        // Display area (shrinks when history is open)
         Card(
-            //can adjust size of the history panel by adjusting weight
-            modifier = Modifier.fillMaxWidth().weight(if (showHistory) 0.3f else 1f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(if (showHistory) 0.3f else 1f),
             colors = CardDefaults.cardColors(containerColor = CalcColors.Display)
         ) {
             Column(
-                //display text alignment
                 modifier = Modifier.fillMaxSize().padding(16.dp),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    //display text properties
                     text = displayText,
                     color = CalcColors.DisplayText,
                     fontSize = 54.sp,
@@ -241,10 +235,9 @@ fun CalculatorScreen() {
             }
         }
 
-        //buttons
+        // Button grid
         Column(modifier = Modifier.fillMaxWidth()) {
 
-            //Row 1
             Row(modifier = Modifier.fillMaxWidth()) {
                 CalcButton("AC", Modifier.weight(1f), CalcColors.ClearBtn) { clear() }
                 CalcButton("⌫", Modifier.weight(1f), CalcColors.BackspaceBtn) { backspace() }
@@ -252,7 +245,6 @@ fun CalculatorScreen() {
                 CalcButton("÷", Modifier.weight(1f), CalcColors.OperatorBtn) { executeOperation("÷") }
             }
 
-            //Row 2
             Row(modifier = Modifier.fillMaxWidth()) {
                 CalcButton("7", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("7") }
                 CalcButton("8", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("8") }
@@ -260,7 +252,6 @@ fun CalculatorScreen() {
                 CalcButton("×", Modifier.weight(1f), CalcColors.OperatorBtn) { executeOperation("×") }
             }
 
-            //Row 3
             Row(modifier = Modifier.fillMaxWidth()) {
                 CalcButton("4", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("4") }
                 CalcButton("5", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("5") }
@@ -268,7 +259,6 @@ fun CalculatorScreen() {
                 CalcButton("-", Modifier.weight(1f), CalcColors.OperatorBtn) { executeOperation("-") }
             }
 
-            //Row 4
             Row(modifier = Modifier.fillMaxWidth()) {
                 CalcButton("1", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("1") }
                 CalcButton("2", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber("2") }
@@ -276,7 +266,6 @@ fun CalculatorScreen() {
                 CalcButton("+", Modifier.weight(1f), CalcColors.OperatorBtn) { executeOperation("+") }
             }
 
-            //Row 5
             Row(modifier = Modifier.fillMaxWidth()) {
                 CalcButton("0", Modifier.weight(2f), CalcColors.NumberBtn) { appendNumber("0") }
                 CalcButton(".", Modifier.weight(1f), CalcColors.NumberBtn) { appendNumber(".") }
@@ -286,6 +275,7 @@ fun CalculatorScreen() {
     }
 }
 
+// Reusable button so layout/styling stays consistent.
 @Composable
 fun CalcButton(
     text: String,
