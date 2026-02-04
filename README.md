@@ -6,7 +6,7 @@ Developed as part of the UMGC CMSC 495 Computer Science Capstone, with an emphas
 > Focus: readable code, predictable behavior, and a UI theme built around gold / plum / ink tones.
 
 ## Screenshot
-![Calculator Screenshot](calculator_screenshot.png)
+
 
 ## Features
 - Basic arithmetic: addition, subtraction, multiplication, division
